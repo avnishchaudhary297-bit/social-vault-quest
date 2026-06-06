@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCERT MCQ Master 8-12</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 10px; }
+       .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; }
+       .header { background: #4CAF50; color: white; padding: 20px; text-align: center; }
+       .controls { padding: 15px; display: flex; gap: 10px; flex-wrap: wrap; background: #f8f9fa; border-bottom: 1px solid #ddd; }
+        select, button { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+        button { background: #4CAF50; color: white; border: none; cursor: pointer; }
+        button:hover { background: #45a049; }
+       .lang-toggle { margin-left: auto; background: #2196F3; }
+       .quiz-box { padding: 20px; }
+       .question { font-size: 18px; font-weight: 600; margin-bottom: 15px; }
+       .options { display: grid; gap: 10px; }
+       .option { padding: 12px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.3s; }
+       .option:hover { background: #f5f5f5; }
+       .option.correct { background: #d4edda; border-color: #28a745; color: #155724; }
+       .option.wrong { background: #f8d7da; border-color: #dc3545; color: #721c24; }
+       .option.disabled { pointer-events: none; opacity: 0.7; }
+       .explanation { margin-top: 15px; padding: 12px; background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 4px; display: none; }
+       .score { text-align: center; font-size: 20px; padding: 20px; }
+       .next-btn { margin-top: 15px; width: 100%; display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NCERT MCQ Master</h1>
+            <p>Class 8-12 | History, Geo, Civics, Pol Science</p>
+        </div>
+
+        <div class="controls">
+            <select id="classSelect">
+                <option value="9">Class 9</option>
+                <option value="10" selected>Class 10</option>
+                <option value="11">Class 11</option>
+                <option value="12">Class 12</option>
+            </select>
+            <select id="subjectSelect">
+                <option value="history">History</option>
+                <option value="geography">Geography</option>
+                <option value="civics">Civics</option>
+                <option value="polity">Pol Science</option>
+            </select>
+            <button onclick="startQuiz()">Start Quiz</button>
+            <button class="lang-toggle" onclick="toggleLang()">हिंदी / English</button>
+        </div>
+
+        <div class="quiz-box" id="quizBox">
+            <div class="score">Select Class & Subject to Start</div>
+        </div>
+    </div>
+
+<script>
+// ====== YAHAN APNE 3000 MCQ DALNE HAIN ======
+// Format: class, subject, q_en, q_hi, a_en, a_hi, b_en, b_hi, c_en, c_hi, d_en, d_hi, ans, exp_en, exp_hi
+const allQuestions = [
+    {
+        class: 10, subject: "history",
+        q_en: "When was the fortress-prison, the Bastille, stormed?",
+        q_hi: "किले-जेल बास्तील पर हमला कब हुआ था?",
+        a_en: "14 June 1789", a_hi: "14 जून 1789",
+        b_en: "14 July 1789", b_hi: "14 जुलाई 1789",
+        c_en: "14 Aug 1789", c_hi: "14 अगस्त 1789",
+        d_en: "14 May 1789", d_hi: "14 मई 1789",
+        ans: "B",
+        exp_en: "On 14 July 1789, people of Paris attacked Bastille. This started the French Revolution.",
+        exp_hi: "14 जुलाई 1789 को पेरिस की जनता ने बास्तील पर हमला किया। यहीं से फ्रांस की क्रांति शुरू हुई।"
+    },
+    {
+        class: 10, subject: "history",
+        q_en: "Who hosted the Congress of Vienna?",
+        q_hi: "वियना कांग्रेस की मेजबानी किसने की?",
+        a_en: "Metternich", a_hi: "मेटरनिख",
+        b_en: "Bismarck", b_hi: "बिस्मार्क",
+        c_en: "Mazzini", c_hi: "मैजिनी",
+        d_en: "Garibaldi", d_hi: "गैरीबाल्डी",
+        ans: "A",
+        exp_en: "Austrian Chancellor Duke Metternich hosted it in 1815.",
+        exp_hi: "ऑस्ट्रियाई चांसलर ड्यूक मेटरनिख ने 1815 में इसकी मेजबानी की।"
+    },
+    // YAHAN AUR 2998 MCQ ADD KAR DENA ISI FORMAT MEIN
+];
+
+let currentLang = 'en'; // 'en' ya 'hi'
+let currentQuiz = [];
+let currentQ = 0;
+let score = 0;
+
+function toggleLang() {
+    currentLang = currentLang === 'en'? 'hi' : 'en';
+    document.querySelector('.lang-toggle').textContent = currentLang === 'en'? 'हिंदी / English' : 'English / हिंदी';
+    if(currentQuiz.length > 0) showQuestion();
+}
+
+function startQuiz() {
+    const cls = document.getElementById('classSelect').value;
+    const sub = document.getElementById('subjectSelect').value;
+    currentQuiz = allQuestions.filter(q => q.class == cls && q.subject == sub);
+    if(currentQuiz.length === 0) {
+        document.getElementById('quizBox').innerHTML = '<div class="score">No questions found for this selection!</div>';
+        return;
+    }
+    currentQ = 0; score = 0;
+    showQuestion();
+}
+
+function showQuestion() {
+    if(currentQ >= currentQuiz.length) {
+        document.getElementById('quizBox').innerHTML = `
+            <div class="score">
+                Quiz Complete! 🎉<br>
+                Your Score: ${score} / ${currentQuiz.length}<br>
+                <button onclick="startQuiz()">Restart</button>
+            </div>`;
+        return;
+    }
+
+    const q = currentQuiz[currentQ];
+    const qText = currentLang === 'en'? q.q_en : q.q_hi;
+    const opts = [
+        {key: 'A', en: q.a_en, hi: q.a_hi},
+        {key: 'B', en: q.b_en, hi: q.b_hi},
+        {key: 'C', en: q.c_en, hi: q.c_hi},
+        {key: 'D', en: q.d_en, hi: q.d_hi}
+    ];
+
+    let html = <div class="question">Q${currentQ+1}. ${qText}</div><div class="options">;
+    opts.forEach(opt => {
+        html += <div class="option" onclick="checkAns('${opt.key}', this)">${opt.key}) ${currentLang === 'en'? opt.en : opt.hi}</div>;
+    });
+    html += </div><div class="explanation" id="exp"></div><button class="next-btn" onclick="nextQ()">Next Question</button>;
+
+    document.getElementById('quizBox').innerHTML = html;
+}
+
+function checkAns(selected, elem) {
+    const q = currentQuiz[currentQ];
+    const allOpts = document.querySelectorAll('.option');
+    const expDiv = document.getElementById('exp');
+    const nextBtn = document.querySelector('.next-btn');
+
+    allOpts.forEach(opt => opt.classList.add('disabled'));
+
+    if(selected === q.ans) {
+        elem.classList.add('correct');
+        score++;
+        expDiv.innerHTML = <b>Correct! ✅</b><br>${currentLang === 'en'? q.exp_en : q.exp_hi};
+    } else {
+        elem.classList.add('wrong');
+        // Sahi wala green kar do
+        allOpts.forEach(opt => {
+            if(opt.textContent.startsWith(q.ans)) opt.classList.add('correct');
+        });
+        expDiv.innerHTML = <b>Wrong! ❌ Correct: ${q.ans}</b><br>${currentLang === 'en'? q.exp_en : q.exp_hi};
+    }
+
+    expDiv.style.display = 'block';
+    nextBtn.style.display = 'block';
+}
+
+function nextQ() {
+    currentQ++;
+    showQuestion();
+}
+</script>
+</body>
+</html>
